@@ -1,5 +1,4 @@
-
-name: Update Subscription
+name: Clean VLESS Subscription
 
 on:
   schedule:
@@ -11,21 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Fetch VLESS
+      - name: Clone source repo
         run: |
-          echo "vless://example1" > links.txt
-          echo "vless://example2" >> links.txt
+          git clone https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
+
+      - name: Merge files
+        run: |
+          cat repo/subscriptions/vless/* > all.txt
+
+      - name: Filter only valid VLESS
+        run: |
+          grep '^vless://' all.txt > vless.txt
+
+      - name: Remove duplicates
+        run: |
+          sort vless.txt | uniq > clean.txt
+
+      - name: Remove empty lines
+        run: |
+          sed '/^$/d' clean.txt > final.txt
 
       - name: Convert to Base64
         run: |
-          base64 links.txt > sub.txt
+          base64 final.txt > sub.txt
 
-      - name: Commit
+      - name: Push result
         run: |
-          git config --global user.name "bot"
-          git config --global user.email "bot@github.com"
-          git add .
-          git commit -m "update sub" || echo "no changes"
-          git push
+          git init
+          git config user.name "bot"
+          git config user.email "bot@github.com"
+          git add sub.txt
+          git commit -m "update clean sub" || echo "no change"
+          git branch -M main
+          git remote add origin https://github.com/SMaryamHosseini/my-sub.git
+          git push -f origin main
