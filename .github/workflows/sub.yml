@@ -42,5 +42,5 @@ jobs:
           git add sub.txt
           git commit -m "update clean sub" || echo "no change"
           git branch -M main
-          git remote add origin https://github.com/SMaryamHosseini/my-sub.git
+          git remote add origin https://github.com/SMaryamHosseini/Mysub.git
           git push -f origin main
