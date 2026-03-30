@@ -1,1 +1,31 @@
 
+name: Update Subscription
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Fetch VLESS
+        run: |
+          echo "vless://example1" > links.txt
+          echo "vless://example2" >> links.txt
+
+      - name: Convert to Base64
+        run: |
+          base64 links.txt > sub.txt
+
+      - name: Commit
+        run: |
+          git config --global user.name "bot"
+          git config --global user.email "bot@github.com"
+          git add .
+          git commit -m "update sub" || echo "no changes"
+          git push
