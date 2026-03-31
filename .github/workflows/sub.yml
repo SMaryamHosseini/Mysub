@@ -10,24 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout your repo
         uses: actions/checkout@v3
 
       - name: Clone source repo
         run: |
-          git clone https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
+          rm -rf repo
+          git clone --depth=1 https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
 
-      - name: Copy VLESS file
+      - name: Read single vless file (FIX)
         run: |
           cat repo/subscriptions/vless > all.txt
 
-      - name: Filter valid VLESS
+      - name: Normalize & filter VLESS
         run: |
-          grep '^vless://' all.txt > vless.txt || true
+          tr -d '\r' < all.txt | grep -oE 'vless://[^[:space:]]+' > vless.txt || true
 
       - name: Remove duplicates
         run: |
-          sort vless.txt | uniq > clean.txt
+          sort -u vless.txt > clean.txt
 
       - name: Ensure not empty
         run: |
@@ -39,7 +40,7 @@ jobs:
         run: |
           base64 clean.txt > sub.txt
 
-      - name: Push
+      - name: Commit & push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
