@@ -17,13 +17,9 @@ jobs:
         run: |
           git clone https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
 
-      - name: Merge safely
+      - name: Merge ALL files (no extension filter)
         run: |
-          find repo/subscriptions/vless -type f -name "*.txt" -exec cat {} + > all.txt || true
-
-      - name: Ensure file exists
-        run: |
-          touch all.txt
+          find repo/subscriptions/vless -type f -exec cat {} + > all.txt
 
       - name: Filter valid VLESS
         run: |
@@ -31,16 +27,16 @@ jobs:
 
       - name: Remove duplicates
         run: |
-          sort vless.txt | uniq > clean.txt || true
+          sort vless.txt | uniq > clean.txt
 
       - name: Remove empty lines
         run: |
-          sed '/^$/d' clean.txt > final.txt || true
+          sed '/^$/d' clean.txt > final.txt
 
       - name: Check if empty
         run: |
           if [ ! -s final.txt ]; then
-            echo "No valid VLESS found" > final.txt
+            echo "vless://dummy" > final.txt
           fi
 
       - name: Convert to Base64
