@@ -13,21 +13,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Fetch file list from GitHub API
+      - name: Clone source repo
         run: |
-          curl -s https://api.github.com/repos/HadiDastangoo/TelegramV2RayExtractor/contents/subscriptions/vless > files.json
+          git clone https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
 
-      - name: Extract download URLs
+      - name: Copy VLESS file
         run: |
-          cat files.json | grep download_url | cut -d '"' -f 4 > urls.txt
-
-      - name: Download and merge all
-        run: |
-          > all.txt
-          while read url; do
-            curl -s "$url" >> all.txt
-            echo "" >> all.txt
-          done < urls.txt
+          cat repo/subscriptions/vless > all.txt
 
       - name: Filter valid VLESS
         run: |
