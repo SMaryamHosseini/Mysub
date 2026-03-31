@@ -1,4 +1,4 @@
-name: Clean VLESS Subscription
+name: Build VLESS Subscription
 
 on:
   schedule:
@@ -10,16 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout your repo
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Clone source repo
+      - name: Fetch file list from GitHub API
         run: |
-          git clone https://github.com/HadiDastangoo/TelegramV2RayExtractor.git repo
+          curl -s https://api.github.com/repos/HadiDastangoo/TelegramV2RayExtractor/contents/subscriptions/vless > files.json
 
-      - name: Merge ALL files (no extension filter)
+      - name: Extract download URLs
         run: |
-          find repo/subscriptions/vless -type f -exec cat {} + > all.txt
+          cat files.json | grep download_url | cut -d '"' -f 4 > urls.txt
+
+      - name: Download and merge all
+        run: |
+          > all.txt
+          while read url; do
+            curl -s "$url" >> all.txt
+            echo "" >> all.txt
+          done < urls.txt
 
       - name: Filter valid VLESS
         run: |
@@ -29,21 +37,17 @@ jobs:
         run: |
           sort vless.txt | uniq > clean.txt
 
-      - name: Remove empty lines
+      - name: Ensure not empty
         run: |
-          sed '/^$/d' clean.txt > final.txt
-
-      - name: Check if empty
-        run: |
-          if [ ! -s final.txt ]; then
-            echo "vless://dummy" > final.txt
+          if [ ! -s clean.txt ]; then
+            echo "vless://dummy" > clean.txt
           fi
 
       - name: Convert to Base64
         run: |
-          base64 final.txt > sub.txt
+          base64 clean.txt > sub.txt
 
-      - name: Commit & push
+      - name: Push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
