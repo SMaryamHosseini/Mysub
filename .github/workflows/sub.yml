@@ -5,13 +5,16 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout your repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Clone source repo
         run: |
